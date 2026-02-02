@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\begin{document}
+
+\section{$RAPM_{team}: Predictor\ of\ Win\%$}
+
+Team RAPM is calculated as:
+
+\begin{equation}
+\text{RAPM}_{\text{team}} = \frac{\sum_{i\in team} \text{RAPM}_i \times \text{Minutes}_i}{\sum_{i\in team} \text{Minutes}_i}
+\end{equation}
+
+Based on NBA regular season data from 2015 to 2023, comprising 270 team-season observations, we get:
+
+\begin{equation}
+\widehat{\text{Win\%}} = 0.5120 + 0.1287 \times \text{RAPM} ,R^2 = 0.8170
+\end{equation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{regression_plot.pdf}
+    \caption{strong linear relationship between team RAPM and win percentage.}
+    \label{fig:regression}
+\end{figure}
+
+\end{document}
