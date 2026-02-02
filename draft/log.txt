@@ -1,0 +1,52 @@
+def calculate_salary_efficiency(salary: float, age: float, 
+                                as_score: float, pw: float) -> float:
+    """
+    计算薪资效率 SalEff
+    论文公式改进：SalEff = (Performance / Salary) * Age_Factor
+    """
+    if salary <= 0 or pd.isna(salary):
+        return 0.5
+    
+    # 年龄因子
+    if pd.isna(age) or age == 0:
+        age_factor = 0.7
+    elif age < 26:
+        age_factor = 0.95 + (26 - age) * 0.01
+    elif age < 31:
+        age_factor = 0.95 - (age - 26) * 0.06
+    else:
+        age_factor = max(0.2, 0.70 - (age - 31) * 0.08)
+    
+    # 表现得分
+    performance = as_score * 0.7 + pw * 0.3
+    
+    # 薪资标准化
+    salary_normalized = min(salary / 50_000_000, 1.0)
+    
+    if salary_normalized > 0:
+        sal_eff = (performance / salary_normalized) * age_factor
+    else:
+        sal_eff = 0.5
+    
+    sal_eff = min(1.0, max(0.0, sal_eff / 2.0))
+    
+    return sal_eff
+这个薪资效率函数过于主观。我们希望把它写成一个能检测过高工资的函数，相应的也会赋予其负权重。我们回归过这样一个AS-Salary的函数：
+For x < 0.3888:
+  y = 3,766,934.83
+
+For x >= 0.3888:
+  p(x) = -845,971,623.25
+         + 6,145,639,055.62 * x
+         + -16,418,399,881.94 * x^2
+         + 6,145,639,055.62 * x
+         + -16,418,399,881.94 * x^2
+         + -16,418,399,881.94 * x^2
+         + 19,160,199,037.44 * x^3
+         + -8,088,788,752.32 * x^4
+
+Max Model:
+  f(x) = max(3,766,934.83, p(x))
+  σresidual​ = 904,270.18
+把这个函数单独写成函数，再把后用某个函数把(salary-f(as_score))/sigma投射到（-1，1之间）（请你结合经验告诉我什么函数更好），
+不能改变正负号以便让它成为normalized的惩罚。照此修改这个函数。（注意这个函数的量纲与我们原有的salary，as是否对齐？也帮我检查一下）
