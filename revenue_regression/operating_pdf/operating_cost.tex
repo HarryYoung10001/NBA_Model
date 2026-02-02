@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb}
+
+\begin{document}
+
+\section*{Team Financial \& Salary Model}
+
+\subsection*{1. Revenue and Cost Function}
+The revenue of Team $i$ at time $t$, denoted as $Rev_{T_i}(t)$, is modeled as:
+\begin{equation}
+    Rev_{T_i}(t) = \lambda_1 Win_i(t) + \lambda_2 \ln(Win_i(t-1)) + \lambda_3 t + \lambda_4 MS_i + C
+\end{equation}
+where $MS$ represents the Market Size.
+
+The total cost $Cost_{T_i}(t)$ is defined as:
+\begin{equation}
+    Cost_{T_i}(t) = \sum Sal_{p,i}(t) + \text{Lux\_Tax}_i(t)
+\end{equation}
+
+The Operating Income $O\_InT_i(t)$ is:
+\begin{equation}
+    O\_InT_i(t) = Rev_{T_i}(t) - Cost_{T_i}(t)
+\end{equation}
+
+\subsection*{2. Player Salary \& Risk}
+Player salary is proportional to their total score:
+\begin{equation}
+    Sal_{p,i}(t) = r \cdot \text{Total\_Score}_{p,i}(t)
+\end{equation}
+
+The risk factor is modeled as:
+\begin{equation}
+    Risk(t) = L_1 \frac{\sum Sal_{p,i}}{Rev_{T_i}(t)} + L_2 \text{Var}(A - S)
+\end{equation}
+
+\subsection*{3. Salary Cap \& Restrictions}
+The Salary Cap is determined by the league's total revenue (sharing 51\% among 30 teams):
+\begin{equation}
+    Sal\_Cap = \frac{\sum_{i=1}^{30} Rev_{T_i}(t) \times 51\%}{30}
+\end{equation}
+
+\textbf{Minimum Salary Floor Restriction:}
+\begin{equation}
+    \sum Sal_{p,i} \ge 0.9 \cdot Sal\_Cap
+\end{equation}
+
+\subsection*{4. Apron Rules (Hard Caps)}
+We define two "Apron" thresholds based on the Salary Cap:
+\begin{align}
+    Ap_1 &= 1.3 \cdot Sal\_Cap \\
+    Ap_2 &= 1.5 \cdot Sal\_Cap
+\end{align}
+
+\textbf{Penalties:}
+\begin{itemize}
+    \item If $Rev_{T_i}(t) > Ap_1$: Add a constant penalty $PN$ to the cost.
+    \item If $Rev_{T_i}(t) > Ap_2$: Revenue $Rev_{T_i}(t)$ stops increasing (Growth Cap).
+\end{itemize}
+
+\subsection*{5. Luxury Tax Mechanism}
+The Luxury Tax Line is set at:
+\begin{equation}
+    Lux\_Line = 1.2 \cdot Sal\_Cap
+\end{equation}
+
+The tax bracket width $W$ is adjusted based on the cap growth (benchmarked to 2023-24):
+\begin{equation}
+    W = 5M \times \frac{Sal\_Cap}{Sal\_Cap_{2023-2024}}
+\end{equation}
+
+Let $X$ be the taxable amount (amount exceeding the tax line):
+\begin{equation}
+    X = \sum Sal_{p,i} - Lux\_Line
+\end{equation}
+*(Note: Handwritten implies X related to Rev, but logically Luxury Tax is based on Salary. Adjusted here for logical consistency based on "Lux-Tax" context)*.
+
+The progressive luxury tax is calculated as:
+\begin{equation}
+    Lux\_Tax_{T_i} = \sum_{j=0}^{n} \min(X - jW, W) \times T_j
+\end{equation}
+where $\min(X - jW, W)$ represents the amount falling into the $j$-th bracket (clamped by width $W$).
+
+\textbf{Tax Rates ($T_j$):}
+\begin{table}[h]
+\centering
+\begin{tabular}{cc}
+\hline
+\textbf{Range (Excess $X$)} & \textbf{Tax Rate ($T_j$)} \\ \hline
+$0 \sim W$ & 1.50 \\
+$W \sim 2W$ & 1.75 \\
+$2W \sim 3W$ & 2.50 \\
+$3W \sim 4W$ & 3.25 \\
+$> 4W$ & +0.5 per bracket \\ \hline
+\end{tabular}
+\end{table}
+
+\end{document}
